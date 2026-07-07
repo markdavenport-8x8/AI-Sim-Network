@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parkway Outdoors — Network Topology: Before & After</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: #EBEAE1;
+    color: #3A3A38;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .header {
+    background: #3A3A38;
+    padding: 18px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 { color: #fff; font-size: 17px; font-weight: 700; }
+  .header .sub { color: #8EBEB1; font-size: 12px; margin-top: 2px; }
+  .header .badge {
+    background: #04888A; color: #fff;
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+  }
+
+  /* ── SPLIT CANVAS ────────────────────────────────── */
+  .canvas {
+    display: grid;
+    grid-template-columns: 1fr 56px 1fr;
+    gap: 0;
+    padding: 28px 24px;
+    min-height: calc(100vh - 62px);
+  }
+
+  /* ── PANEL ───────────────────────────────────────── */
+  .panel { display: flex; flex-direction: column; gap: 0; }
+
+  .panel-header {
+    text-align: center;
+    padding: 12px 16px 10px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .panel-header.before { background: #C0392B; color: #fff; }
+  .panel-header.after  { background: #04888A; color: #fff; }
+  .panel-header .panel-sub { font-size: 10px; font-weight: 500; letter-spacing: 0.03em; opacity: 0.85; margin-top: 2px; }
+
+  /* ── DIVIDER ─────────────────────────────────────── */
+  .divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .arrow-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 10px;
+    font-weight: 700;
+    color: #3A3A38;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .arrow {
+    font-size: 28px;
+    color: #C9DC50;
+    line-height: 1;
+  }
+
+  /* ── PLATFORM CLOUD ──────────────────────────────── */
+  .cloud-row {
+    display: flex;
+    gap: 10px;
+    padding: 14px 12px;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+  .cloud {
+    flex: 1;
+    border-radius: 10px;
+    padding: 12px 10px 10px;
+    text-align: center;
+    position: relative;
+  }
+  .cloud.cisco   { background: #E8F0F8; border: 2px solid #1B6DAB; }
+  .cloud.avaya   { background: #FFF0EC; border: 2px solid #E05C2A; }
+  .cloud.dialpad { background: #F0EBF8; border: 2px solid #7C4DFF; }
+  .cloud.unified { background: #E6F4F4; border: 2px solid #04888A; flex: 1; }
+
+  .cloud-icon { font-size: 22px; margin-bottom: 4px; }
+  .cloud-name {
+    font-size: 11px; font-weight: 700;
+    line-height: 1.2; margin-bottom: 2px;
+  }
+  .cloud.cisco .cloud-name   { color: #1B6DAB; }
+  .cloud.avaya .cloud-name   { color: #E05C2A; }
+  .cloud.dialpad .cloud-name { color: #7C4DFF; }
+  .cloud.unified .cloud-name { color: #04888A; }
+  .cloud-sub { font-size: 9px; color: #666; line-height: 1.3; }
+
+  .products-row {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    flex-wrap: wrap;
+  }
+  .product-chip {
+    font-size: 9px; font-weight: 700;
+    padding: 3px 8px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .chip-work   { background: #E6F4F4; color: #04888A; border: 1px solid #04888A; }
+  .chip-engage { background: #EFF7EE; color: #72AD6C; border: 1px solid #72AD6C; }
+  .chip-cc     { background: #F3EFF8; color: #816AAE; border: 1px solid #816AAE; }
+  .chip-ai     { background: #FFF8F0; color: #F37944; border: 1px solid #F37944; }
+
+  /* ── WIRES ───────────────────────────────────────── */
+  .wire-section {
+    padding: 0 12px 0;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+  svg.wires { display: block; width: 100%; }
+
+  /* ── SITE GRID ───────────────────────────────────── */
+  .site-section {
+    background: #fff;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    padding: 10px 12px 14px;
+  }
+  .site-grid { display: grid; gap: 6px; }
+  .site-grid.before { grid-template-columns: repeat(3, 1fr); }
+  .site-grid.after  { grid-template-columns: repeat(4, 1fr); }
+
+  .site {
+    border-radius: 6px;
+    padding: 7px 6px 6px;
+    text-align: center;
+    border: 1.5px solid;
+    position: relative;
+  }
+  /* Before states */
+  .site.cisco-s   { background: #E8F0F8; border-color: #1B6DAB; }
+  .site.avaya-s   { background: #FFF0EC; border-color: #E05C2A; }
+  .site.hq-s      { background: #E8F0F8; border-color: #1B6DAB; }
+  .site.dc-s      { background: #E8F0F8; border-color: #1B6DAB; }
+  .site.cc-s      { background: #F0EBF8; border-color: #7C4DFF; }
+  /* After states */
+  .site.work-s    { background: #E6F4F4; border-color: #04888A; }
+  .site.engage-s  { background: #EFF7EE; border-color: #72AD6C; }
+  .site.hq-a      { background: #E6F4F4; border-color: #04888A; }
+  .site.dc-a      { background: #E6F4F4; border-color: #04888A; }
+  .site.cc-a      { background: #F3EFF8; border-color: #816AAE; }
+
+  .site-icon { font-size: 14px; line-height: 1; margin-bottom: 2px; }
+  .site-label { font-size: 8.5px; font-weight: 600; line-height: 1.25; color: #3A3A38; }
+  .site-tag {
+    font-size: 7px; font-weight: 700;
+    padding: 1px 4px; border-radius: 6px;
+    margin-top: 3px; display: inline-block;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tag-cisco   { background: #1B6DAB; color: #fff; }
+  .tag-avaya   { background: #E05C2A; color: #fff; }
+  .tag-dialpad { background: #7C4DFF; color: #fff; }
+  .tag-work    { background: #04888A; color: #fff; }
+  .tag-engage  { background: #72AD6C; color: #fff; }
+  .tag-cc      { background: #816AAE; color: #fff; }
+  .tag-ai      { background: #F37944; color: #fff; }
+
+  /* ── PAIN / GAIN BAND ────────────────────────────── */
+  .pain-band, .gain-band {
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 10px 12px;
+    font-size: 9.5px;
+    line-height: 1.6;
+  }
+  .pain-band {
+    background: #FFF0EC;
+    border-left: 4px solid #C0392B;
+    color: #3A3A38;
+  }
+  .gain-band {
+    background: #E6F4F4;
+    border-left: 4px solid #04888A;
+    color: #3A3A38;
+  }
+  .pain-band strong, .gain-band strong {
+    display: block; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 3px;
+  }
+  .pain-band strong { color: #C0392B; }
+  .gain-band strong { color: #04888A; }
+
+  /* ── STATS ROW ───────────────────────────────────── */
+  .stats-row {
+    display: flex;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .stat {
+    flex: 1; text-align: center;
+    padding: 6px 4px;
+    border-radius: 6px;
+  }
+  .stat.bad  { background: #FFF0EC; }
+  .stat.good { background: #E6F4F4; }
+  .stat-val { font-size: 18px; font-weight: 800; line-height: 1; }
+  .stat.bad  .stat-val { color: #C0392B; }
+  .stat.good .stat-val { color: #04888A; }
+  .stat-lbl { font-size: 8px; color: #666; margin-top: 2px; line-height: 1.3; }
+
+  /* ── LEGEND ──────────────────────────────────────── */
+  .legend {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    padding: 14px 24px 20px;
+    justify-content: center;
+    font-size: 10px; color: #555;
+    align-items: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .footnote {
+    text-align: center; font-size: 9px; color: #aaa;
+    padding-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Parkway Outdoors — Network Topology</h1>
+    <div class="sub">Communications Infrastructure: Current State vs. 8x8 Platform</div>
+  </div>
+  <div class="badge">24 Sites · 350 Employees</div>
+</div>
+
+<div class="canvas">
+
+  <!-- ══════════════════════════════ BEFORE ══════════════════════════════ -->
+  <div class="panel">
+
+    <div class="panel-header before">
+      Current State — Fragmented
+      <div class="panel-sub">3 vendors · 3 admin portals · 3 billing cycles · no shared visibility</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat bad"><div class="stat-val">3</div><div class="stat-lbl">Platforms</div></div>
+      <div class="stat bad"><div class="stat-val">3</div><div class="stat-lbl">Admin Portals</div></div>
+      <div class="stat bad"><div class="stat-val">3</div><div class="stat-lbl">Billing Cycles</div></div>
+      <div class="stat bad"><div class="stat-val">34%</div><div class="stat-lbl">Call Abandon (Black Friday)</div></div>
+      <div class="stat bad"><div class="stat-val">5</div><div class="stat-lbl">IT Staff Managing All This</div></div>
+    </div>
+
+    <!-- Platform clouds -->
+    <div class="cloud-row">
+      <div class="cloud cisco">
+        <div class="cloud-icon">🖥️</div>
+        <div class="cloud-name">Cisco UCM</div>
+        <div class="cloud-sub">On-premise<br>HQ + 15 stores + DC</div>
+      </div>
+      <div class="cloud avaya">
+        <div class="cloud-icon">📞</div>
+        <div class="cloud-name">Avaya IP Office</div>
+        <div class="cloud-sub">On-premise<br>7 acquired stores</div>
+      </div>
+      <div class="cloud dialpad">
+        <div class="cloud-icon">☁️</div>
+        <div class="cloud-name">Dialpad Cloud CC</div>
+        <div class="cloud-sub">Cloud CC only<br>14–25 agents</div>
+      </div>
+    </div>
+
+    <!-- SVG wires: 3 clouds → sites below -->
+    <div class="wire-section">
+      <svg class="wires" viewBox="0 0 520 42" preserveAspectRatio="none">
+        <!-- Cisco lines (left cloud → its sites) -->
+        <line x1="88"  y1="0" x2="44"  y2="42" stroke="#1B6DAB" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <line x1="88"  y1="0" x2="88"  y2="42" stroke="#1B6DAB" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <line x1="88"  y1="0" x2="132" y2="42" stroke="#1B6DAB" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <line x1="88"  y1="0" x2="176" y2="42" stroke="#1B6DAB" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <line x1="88"  y1="0" x2="220" y2="42" stroke="#1B6DAB" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <!-- Avaya lines (center cloud → its sites) -->
+        <line x1="260" y1="0" x2="264" y2="42" stroke="#E05C2A" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <line x1="260" y1="0" x2="308" y2="42" stroke="#E05C2A" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <line x1="260" y1="0" x2="352" y2="42" stroke="#E05C2A" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+        <!-- Dialpad lines (right cloud → CC) -->
+        <line x1="432" y1="0" x2="476" y2="42" stroke="#7C4DFF" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.7"/>
+        <!-- No cross-connections — that's the point -->
+        <text x="260" y="24" text-anchor="middle" font-size="8" fill="#C0392B" font-weight="600" font-family="Arial">✕ No shared directory  ✕ No shared presence  ✕ No shared analytics</text>
+      </svg>
+    </div>
+
+    <!-- Sites -->
+    <div class="site-section">
+      <div class="site-grid before">
+        <!-- HQ -->
+        <div class="site hq-s">
+          <div class="site-icon">🏢</div>
+          <div class="site-label">HQ<br>Denver, CO</div>
+          <div class="site-tag tag-cisco">Cisco UCM</div>
+        </div>
+        <!-- Distribution Center -->
+        <div class="site dc-s">
+          <div class="site-icon">🏭</div>
+          <div class="site-label">Distribution Ctr<br>Denver, CO</div>
+          <div class="site-tag tag-cisco">Cisco UCM</div>
+        </div>
+        <!-- 15 Cisco stores -->
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 01<br>CO</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 02<br>CO</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 03<br>CO</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 04<br>CO</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 05<br>UT</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 06<br>UT</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 07<br>AZ</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 08<br>AZ</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 09<br>AZ</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 10<br>NV</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 11<br>NV</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 12<br>NV</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 13<br>CO</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 14<br>UT</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <div class="site cisco-s"><div class="site-icon">🏬</div><div class="site-label">Store 15<br>AZ</div><div class="site-tag tag-cisco">Cisco UCM</div></div>
+        <!-- 7 Avaya stores (Summit Gear) -->
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 01<br>CO</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 02<br>CO</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 03<br>UT</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 04<br>AZ</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 05<br>AZ</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 06<br>NV</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <div class="site avaya-s"><div class="site-icon">🏬</div><div class="site-label">Summit 07<br>NV</div><div class="site-tag tag-avaya">Avaya IP</div></div>
+        <!-- CC agents - separate silo -->
+        <div class="site cc-s" style="grid-column: span 3; background: #F0EBF8;">
+          <div class="site-icon">🎧</div>
+          <div class="site-label">Contact Center — Denver HQ<br><span style="font-size:7.5px;color:#666;">14 agents (voice + email only) · scales to 25 at peak</span></div>
+          <div class="site-tag tag-dialpad">Dialpad Cloud CC · Isolated — cannot see stores or HQ</div>
+        </div>
+      </div>
+
+      <div class="pain-band">
+        <strong>⚠ Current Pain</strong>
+        3 platforms with zero cross-visibility · 15 Cisco UCM sites hitting EOL within 18 months · 34% call abandonment (Black Friday 2024) · 26% of CC inbound is WISMO (resolvable without agent) · workshop staff unreachable on fixed desk phones · IT team managing 3 admin portals, 3 support relationships, 3 billing cycles
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ ARROW ══════════════════════════════ -->
+  <div class="divider">
+    <div class="arrow">→</div>
+    <div class="arrow-label">8x8 Transforms</div>
+  </div>
+
+  <!-- ══════════════════════════════ AFTER ══════════════════════════════ -->
+  <div class="panel">
+
+    <div class="panel-header after">
+      Future State — 8x8 Unified Platform
+      <div class="panel-sub">1 platform · 1 admin portal · 1 billing cycle · intelligence that compounds</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat good"><div class="stat-val">1</div><div class="stat-lbl">Platform</div></div>
+      <div class="stat good"><div class="stat-val">1</div><div class="stat-lbl">Admin Portal</div></div>
+      <div class="stat good"><div class="stat-val">1</div><div class="stat-lbl">Billing Cycle</div></div>
+      <div class="stat good"><div class="stat-val">24</div><div class="stat-lbl">Sites on One Directory</div></div>
+      <div class="stat good"><div class="stat-val">0%</div><div class="stat-lbl">Call Abandonment (target)</div></div>
+    </div>
+
+    <!-- 8x8 Platform cloud -->
+    <div class="cloud-row">
+      <div class="cloud unified" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:14px 16px;">
+        <div style="text-align:center; flex:0 0 auto;">
+          <div class="cloud-icon">☁️</div>
+          <div class="cloud-name" style="font-size:13px;">8x8 Platform for CX</div>
+          <div class="cloud-sub" style="font-size:9px; margin-top:4px;">Communications Intelligence® — One platform. Intelligence that compounds.</div>
+        </div>
+        <div style="flex:1; display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; align-items:center;">
+          <div class="product-chip chip-work">8x8 Work®</div>
+          <div class="product-chip chip-cc">Contact Center</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG wires: 1 cloud → all sites -->
+    <div class="wire-section">
+      <svg class="wires" viewBox="0 0 560 42" preserveAspectRatio="none">
+        <!-- Fan of lines from centre of the single cloud to each site column -->
+        <line x1="280" y1="0" x2="35"  y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="75"  y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="115" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="155" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="195" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="235" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="280" y2="42" stroke="#04888A" stroke-width="1.5" opacity="0.5"/>
+        <line x1="280" y1="0" x2="325" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="370" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="415" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="460" y2="42" stroke="#04888A" stroke-width="1" opacity="0.35"/>
+        <line x1="280" y1="0" x2="525" y2="42" stroke="#72AD6C" stroke-width="1.5" opacity="0.6"/>
+        <text x="280" y="24" text-anchor="middle" font-size="8" fill="#04888A" font-weight="600" font-family="Arial">✓ Shared directory  ✓ Shared presence  ✓ Unified analytics  ✓ Single admin console</text>
+      </svg>
+    </div>
+
+    <!-- Sites -->
+    <div class="site-section">
+      <div class="site-grid after">
+        <!-- HQ -->
+        <div class="site hq-a">
+          <div class="site-icon">🏢</div>
+          <div class="site-label">HQ<br>Denver, CO</div>
+          <div class="site-tag tag-work">8x8 Work</div>
+        </div>
+        <!-- Distribution Center -->
+        <div class="site dc-a">
+          <div class="site-icon">🏭</div>
+          <div class="site-label">Distribution Ctr<br>Denver, CO</div>
+          <div class="site-tag tag-work">8x8 Work</div>
+        </div>
+        <!-- 14 standard stores (8x8 Work only) -->
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 01<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 02<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 03<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 04<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 05<br>UT</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 06<br>UT</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 07<br>AZ</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 08<br>AZ</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 09<br>AZ</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 10<br>NV</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 11<br>NV</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 12<br>NV</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 13<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🏬</div><div class="site-label">Store 14<br>UT</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <!-- 8 Workshop stores (8x8 Work — Engage to be discovered) -->
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 15<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 16<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 17<br>UT</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 18<br>AZ</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 19<br>AZ</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 20<br>NV</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 21<br>NV</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <div class="site work-s"><div class="site-icon">🔧</div><div class="site-label">Store 22<br>CO</div><div class="site-tag tag-work">8x8 Work</div></div>
+        <!-- CC - now connected -->
+        <div class="site cc-a" style="grid-column: span 4; background: #F3EFF8;">
+          <div class="site-icon">🎧</div>
+          <div class="site-label">Contact Center — Denver HQ · Fully connected to stores, HQ, warehouse · Shared customer history<br><span style="font-size:7.5px;color:#666;">8x8 Contact Center X6 · Supervisor real-time visibility · Agents can see store context</span></div>
+          <div style="display:flex;gap:4px;justify-content:center;margin-top:4px;flex-wrap:wrap;">
+            <div class="site-tag tag-cc">8x8 Contact Center</div>
+            <div class="site-tag tag-work">Unified with Stores</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gain-band">
+        <strong>✓ What Changes for Parkway</strong>
+        One platform, one admin console — Mary's team goes from 3 portals to 1 · CC agents see stores and customer history in real time — no more Slack DMs to warehouse · Supervisor real-time visibility into agent performance · Shared directory and presence across all 24 sites · Cisco EOL resolved — all 15 sites migrated by Sep 1
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── LEGEND ──────────────────────────────────────────────────── -->
+<div class="legend">
+  <strong style="font-size:10px;color:#3A3A38;">Legend:</strong>
+  <div class="legend-item"><div class="legend-dot" style="background:#1B6DAB;"></div> Cisco UCM (on-premise)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#E05C2A;"></div> Avaya IP Office (on-premise)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7C4DFF;"></div> Dialpad Cloud CC</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#04888A;"></div> 8x8 Work®</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#816AAE;"></div> 8x8 Contact Center</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3A3A38;"></div> 🔧 Stores with bike workshops (all on 8x8 Work)</div>
+</div>
+
+<div class="footnote">8x8 Internal — Simulation Only · Parkway Outdoors is a fictional account · July 7, 2026</div>
+
+</body>
+</html>
